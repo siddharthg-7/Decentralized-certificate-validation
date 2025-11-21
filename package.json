@@ -1,0 +1,33 @@
+{
+  "name": "web3-certificate-validation-system",
+  "version": "1.0.0",
+  "description": "Decentralized certificate validation system using blockchain, IPFS, and Web3",
+  "main": "index.js",
+  "scripts": {
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "hardhat:node": "cd contracts && npx hardhat node",
+    "hardhat:deploy": "cd contracts && npx hardhat run scripts/deploy.js --network localhost",
+    "hardhat:test": "cd contracts && npx hardhat test",
+    "backend:dev": "cd backend && npm run dev",
+    "frontend:dev": "cd frontend && npm start",
+    "dev": "concurrently \"npm run hardhat:node\" \"npm run backend:dev\" \"npm run frontend:dev\"",
+    "docker:up": "docker-compose up --build",
+    "docker:down": "docker-compose down",
+    "test": "npm run hardhat:test && cd backend && npm test",
+    "clean": "rm -rf node_modules backend/node_modules frontend/node_modules contracts/node_modules"
+  },
+  "keywords": [
+    "blockchain",
+    "ethereum",
+    "web3",
+    "certificate",
+    "validation",
+    "ipfs",
+    "solidity"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

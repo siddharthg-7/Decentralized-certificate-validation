@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # Hardhat Local Blockchain
+  hardhat:
+    image: node:18-alpine
+    container_name: certichain-hardhat
+    working_dir: /app
+    volumes:
+      - ./contracts:/app
+    ports:
+      - "8545:8545"
+    command: npx hardhat node
+    networks:
+      - certichain-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: certichain-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - HARDHAT_NETWORK=hardhat
+      - NODE_ENV=development
+      - AES_ENCRYPTION_KEY=your-32-character-secret-key-change-this
+      - USE_IPFS=false
+      - IPFS_STORAGE_PATH=/app/ipfs-storage
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - backend-data:/app/ipfs-storage
+    depends_on:
+      - hardhat
+    networks:
+      - certichain-network
+    restart: unless-stopped
+
+  # Frontend React App
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: certichain-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000
+      - REACT_APP_CHAIN_ID=31337
+      - REACT_APP_NETWORK_NAME=Hardhat Local
+    depends_on:
+      - backend
+    networks:
+      - certichain-network
+    restart: unless-stopped
+
+networks:
+  certichain-network:
+    driver: bridge
+
+volumes:
+  backend-data:
