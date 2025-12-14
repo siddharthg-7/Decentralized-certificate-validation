@@ -1,38 +1,34 @@
-name: CI/CD Pipeline
+name: CI
 
 on:
   push:
-    branches: [ main, develop ]
-  pull_request:
     branches: [ main ]
 
 jobs:
-  # Dependency Check
   dependency-check:
     name: Dependency Installation Check
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      
+
       - name: Install contract dependencies
         working-directory: ./contracts
         run: npm install
-      
+
       - name: Install backend dependencies
         working-directory: ./backend
         run: npm install
-      
+
       - name: Install frontend dependencies
         working-directory: ./frontend
         run: npm install
-      
+
       - name: Verify installations
         run: |
           echo "✅ All dependencies installed successfully"
@@ -40,24 +36,22 @@ jobs:
           echo "- Backend: $(cd backend && npm list --depth=0 | wc -l) packages"
           echo "- Frontend: $(cd frontend && npm list --depth=0 | wc -l) packages"
 
-  # Smart Contract Validation
   contract-validation:
     name: Smart Contract Validation
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      
+
       - name: Install dependencies
         working-directory: ./contracts
         run: npm install
-      
+
       - name: Check contract files
         working-directory: ./contracts
         run: |
@@ -68,7 +62,7 @@ jobs:
             echo "❌ CertificateRegistry.sol not found"
             exit 1
           fi
-      
+
       - name: Check deployment script
         working-directory: ./contracts
         run: |
@@ -79,34 +73,32 @@ jobs:
             exit 1
           fi
 
-  # Backend Validation
   backend-validation:
     name: Backend API Validation
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      
+
       - name: Install dependencies
         working-directory: ./backend
         run: npm install
-      
+
       - name: Check server file
         working-directory: ./backend
         run: |
           if [ -f "server.js" ]; then
-            echo "✅ Server.js found"
+            echo "✅ server.js found"
           else
-            echo "❌ Server.js not found"
+            echo "❌ server.js not found"
             exit 1
           fi
-      
+
       - name: Check API routes
         working-directory: ./backend
         run: |
@@ -116,7 +108,7 @@ jobs:
             echo "❌ Certificate routes not found"
             exit 1
           fi
-      
+
       - name: Check utilities
         working-directory: ./backend
         run: |
@@ -125,24 +117,22 @@ jobs:
           [ -f "utils/web3.js" ] && echo "✅ Web3 utils found" || exit 1
           [ -f "utils/ipfs.js" ] && echo "✅ IPFS utils found" || exit 1
 
-  # Frontend Build
   frontend-build:
     name: Frontend Build
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      
+
       - name: Install dependencies
         working-directory: ./frontend
         run: npm install
-      
+
       - name: Check React components
         working-directory: ./frontend
         run: |
@@ -151,7 +141,7 @@ jobs:
           [ -f "src/pages/Home.jsx" ] && echo "✅ Home page found" || exit 1
           [ -f "src/pages/IssueCertificate.jsx" ] && echo "✅ Issue page found" || exit 1
           [ -f "src/pages/VerifyCertificate.jsx" ] && echo "✅ Verify page found" || exit 1
-      
+
       - name: Build application
         working-directory: ./frontend
         run: npm run build
@@ -160,7 +150,7 @@ jobs:
           REACT_APP_API_URL: http://localhost:5000
           REACT_APP_CHAIN_ID: 31337
           REACT_APP_NETWORK_NAME: Hardhat Local
-      
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -168,15 +158,13 @@ jobs:
           path: frontend/build/
         continue-on-error: true
 
-  # Documentation Check
   documentation-check:
     name: Documentation Check
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+
       - name: Check documentation files
         run: |
           echo "Checking documentation..."
@@ -184,7 +172,7 @@ jobs:
           [ -f "QUICKSTART.md" ] && echo "✅ QUICKSTART.md found" || exit 1
           [ -f ".env.example" ] && echo "✅ .env.example found" || exit 1
           [ -f "docker-compose.yml" ] && echo "✅ docker-compose.yml found" || exit 1
-      
+
       - name: Check README content
         run: |
           if grep -q "CertiChain" README.md; then
@@ -194,13 +182,11 @@ jobs:
             exit 1
           fi
 
-  # Build Summary
   build-summary:
     name: Build Summary
     runs-on: ubuntu-latest
     needs: [dependency-check, contract-validation, backend-validation, frontend-build, documentation-check]
     if: always()
-    
     steps:
       - name: Check job statuses
         run: |
