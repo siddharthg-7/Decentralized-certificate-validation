@@ -152,11 +152,11 @@ jobs:
           REACT_APP_NETWORK_NAME: Hardhat Local
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: frontend-build
-          path: frontend/build/
-        continue-on-error: true
+   uses: actions/upload-artifact@v4
+  with:
+    name: frontend-build
+    path: frontend/build/
+  continue-on-error: true
 
   documentation-check:
     name: Documentation Check
